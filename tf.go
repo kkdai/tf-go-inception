@@ -17,7 +17,6 @@ package main
 import (
 	"archive/zip"
 	"bufio"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -30,7 +29,7 @@ import (
 	"github.com/tensorflow/tensorflow/tensorflow/go/op"
 )
 
-func main() {
+func MainTF(currentPath string, imageDir string) {
 	// An example for using the TensorFlow Go API for image recognition
 	// using a pre-trained inception model (http://arxiv.org/abs/1512.00567).
 	//
@@ -62,15 +61,10 @@ func main() {
 	// - Constructs another TensorFlow graph to normalize the image into a
 	//   form suitable for the model (for example, resizing the image)
 	// - Creates an executes a Session to obtain a Tensor in this normalized form.
-	modeldir := flag.String("dir", "", "Directory containing the trained model files. The directory will be created and the model downloaded into it if necessary")
-	imagefile := flag.String("image", "", "Path of a JPEG-image to extract labels for")
-	flag.Parse()
-	if *modeldir == "" || *imagefile == "" {
-		flag.Usage()
-		return
-	}
+	// modeldir := flag.String("dir", "", "Directory containing the trained model files. The directory will be created and the model downloaded into it if necessary")
+
 	// Load the serialized GraphDef from a file.
-	modelfile, labelsfile, err := modelFiles(*modeldir)
+	modelfile, labelsfile, err := modelFiles(currentPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,7 +90,7 @@ func main() {
 	// For multiple images, session.Run() can be called in a loop (and
 	// concurrently). Alternatively, images can be batched since the model
 	// accepts batches of image data as input.
-	tensor, err := makeTensorFromImage(*imagefile)
+	tensor, err := makeTensorFromImage(imageDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,6 +110,11 @@ func main() {
 	// Find the most probably label index.
 	probabilities := output[0].Value().([][]float32)[0]
 	printBestLabel(probabilities, labelsfile)
+
+	forever := make(chan bool)
+	port := os.Getenv("PORT")
+	log.Println("-----Server Start in port=", port, " -----")
+	serveHttpAPI(":6000", forever)
 }
 
 func printBestLabel(probabilities []float32, labelsFile string) {
