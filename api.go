@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//serveHttpAPI :
 func serveHttpAPI(port string, existC chan bool) {
 	fmt.Println("Enter http")
 
@@ -49,6 +51,17 @@ func serveHttpAPI(port string, existC chan bool) {
 
 //CreateTFImage :
 func CreateTFImage(c *gin.Context) {
+	file, header, err := c.Request.FormFile("upload")
+	filename := header.Filename
+	log.Println(header.Filename, filename)
+	byt, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Println("Read upload file err:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "Error happen!"})
+		return
+	}
+
+	byteToTensor(byt)
 	// completed, _ := strconv.Atoi(c.PostForm("completed"))
 	// todo := Todo{Title: c.PostForm("title"), Completed: completed}
 	// db, _ := Database()

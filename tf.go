@@ -29,6 +29,55 @@ import (
 	"github.com/tensorflow/tensorflow/tensorflow/go/op"
 )
 
+//TFfromForm :
+func TFfromForm(byt []byte) string {
+
+	// Load the serialized GraphDef from a file.
+	modelfile, labelsfile, err := modelFiles(CurrentPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	model, err := ioutil.ReadFile(modelfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Construct an in-memory graph from the serialized form.
+	graph := tf.NewGraph()
+	if err := graph.Import(model, ""); err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a session for inference over graph.
+	session, err := tf.NewSession(graph, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	tensor, err := byteToTensor(byt)
+	if err != nil {
+		log.Fatal(err)
+	}
+	output, err := session.Run(
+		map[tf.Output]*tf.Tensor{
+			graph.Operation("input").Output(0): tensor,
+		},
+		[]tf.Output{
+			graph.Operation("output").Output(0),
+		},
+		nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// output[0].Value() is a vector containing probabilities of
+	// labels for each image in the "batch". The batch size was 1.
+	// Find the most probably label index.
+	probabilities := output[0].Value().([][]float32)[0]
+	return printBestLabel(probabilities, labelsfile)
+}
+
+//MainTF :
 func MainTF(currentPath string, imageDir string) {
 	// An example for using the TensorFlow Go API for image recognition
 	// using a pre-trained inception model (http://arxiv.org/abs/1512.00567).
@@ -110,14 +159,9 @@ func MainTF(currentPath string, imageDir string) {
 	// Find the most probably label index.
 	probabilities := output[0].Value().([][]float32)[0]
 	printBestLabel(probabilities, labelsfile)
-
-	forever := make(chan bool)
-	port := os.Getenv("PORT")
-	log.Println("-----Server Start in port=", port, " -----")
-	serveHttpAPI(":6000", forever)
 }
 
-func printBestLabel(probabilities []float32, labelsFile string) {
+func printBestLabel(probabilities []float32, labelsFile string) string {
 	bestIdx := 0
 	for i, p := range probabilities {
 		if p > probabilities[bestIdx] {
@@ -139,7 +183,9 @@ func printBestLabel(probabilities []float32, labelsFile string) {
 	if err := scanner.Err(); err != nil {
 		log.Printf("ERROR: failed to read %s: %v", labelsFile, err)
 	}
-	fmt.Printf("BEST MATCH: (%2.0f%% likely) %s\n", probabilities[bestIdx]*100.0, labels[bestIdx])
+	str := fmt.Sprintf("BEST MATCH: (%2.0f%% likely) %s\n", probabilities[bestIdx]*100.0, labels[bestIdx])
+	log.Println(str)
+	return str
 }
 
 // Convert the image in filename to a Tensor suitable as input to the Inception model.
@@ -148,8 +194,13 @@ func makeTensorFromImage(filename string) (*tf.Tensor, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return byteToTensor(bytes)
+}
+
+func byteToTensor(byt []byte) (*tf.Tensor, error) {
 	// DecodeJpeg uses a scalar String-valued tensor as input.
-	tensor, err := tf.NewTensor(string(bytes))
+	tensor, err := tf.NewTensor(string(byt))
 	if err != nil {
 		return nil, err
 	}

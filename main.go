@@ -7,12 +7,13 @@ import (
 	"path/filepath"
 )
 
+//CurrentPath :
 var CurrentPath string
 
 func main() {
 	//Make a forever channel which not exist for now
-
-	CurrentPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	var err error
+	CurrentPath, err = filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
 	}
