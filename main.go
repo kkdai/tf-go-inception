@@ -22,10 +22,12 @@ func main() {
 	flag.Parse()
 	log.Println("Path=", CurrentPath, " img=", *imagefile)
 
-	MainTF(CurrentPath, *imagefile)
+	if imagefile != nil {
+		MainTF(CurrentPath, *imagefile)
+	}
 
 	forever := make(chan bool)
 	port := os.Getenv("PORT")
 	log.Println("-----Server Start in port=", port, " -----")
-	serveHTTPAPI(":6000", forever)
+	serveHTTPAPI(":3000", forever)
 }

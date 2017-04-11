@@ -30,11 +30,7 @@ func serveHTTPAPI(port string, existC chan bool) {
 
 	fooAPI := router.Group("/api/v1/foo")
 	{
-		fooAPI.POST("/", CreatFoo)
 		fooAPI.GET("/", TestFoo)
-		// 	// 	rsAPI.GET("/:id", FetchSingleJob)
-		// 	// 	rsAPI.PUT("/:id", UpdateJob)
-		// 	// 	rsAPI.DELETE("/:id", DeleteJob)
 	}
 
 	// rsAPI := router.Group("/api/v1/resources")
@@ -46,13 +42,15 @@ func serveHTTPAPI(port string, existC chan bool) {
 	// 	rsAPI.DELETE("/:id", DeleteJob)
 	// }
 
-	router.Run(":3000")
+	router.Run(port)
 }
 
 //PredictTFImage :
 func PredictTFImage(c *gin.Context) {
 	log.Println("Entry PredictTFImage..")
 	file, header, err := c.Request.FormFile("upload")
+	defer file.Close()
+
 	if err != nil {
 		log.Println("Parse Form failed:", err)
 		return
@@ -67,35 +65,8 @@ func PredictTFImage(c *gin.Context) {
 		return
 	}
 
-	defer file.Close()
-	// fmt.Fprintf(w, "%v", header)
-	// f, err := os.OpenFile("./"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	// defer f.Close()
-	// io.Copy(f, file)
-
 	ret := TFfromForm(byt)
-	c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": fmt.Sprintf("Predict result:%s", ret)})
-	// completed, _ := strconv.Atoi(c.PostForm("completed"))
-	// todo := Todo{Title: c.PostForm("title"), Completed: completed}
-	// db, _ := Database()
-	// defer db.Close()
-	// db.Save(&todo)
-	// c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Todo item created successfully!", "resourceId": todo.ID})
-}
-
-//CreatFoo :
-func CreatFoo(c *gin.Context) {
-	log.Println("CreatFoo:", c)
-	// completed, _ := strconv.Atoi(c.PostForm("completed"))
-	// todo := Todo{Title: c.PostForm("title"), Completed: completed}
-	// db, _ := Database()
-	// defer db.Close()
-	// db.Save(&todo)
-	// c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Todo item created successfully!", "resourceId": todo.ID})
+	c.JSON(http.StatusCreated, gin.H{"status": http.StatusOK, "message": fmt.Sprintf("Predict result:%s", ret)})
 }
 
 //TestFoo :

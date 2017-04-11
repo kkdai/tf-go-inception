@@ -70,6 +70,7 @@ func TFfromForm(byt []byte) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// output[0].Value() is a vector containing probabilities of
 	// labels for each image in the "batch". The batch size was 1.
 	// Find the most probably label index.
