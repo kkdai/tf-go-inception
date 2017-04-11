@@ -70,7 +70,7 @@ func PredictTFImage(c *gin.Context) {
 
 	defer file.Close()
 	// fmt.Fprintf(w, "%v", header)
-	f, err := os.OpenFile("./test/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("./"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return
