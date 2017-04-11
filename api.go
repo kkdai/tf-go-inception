@@ -54,6 +54,10 @@ func serveHTTPAPI(port string, existC chan bool) {
 func PredictTFImage(c *gin.Context) {
 	log.Println("Entry PredictTFImage..")
 	file, header, err := c.Request.FormFile("upload")
+	if err != nil {
+		log.Println("Parse Form failed:", err)
+		return
+	}
 	filename := header.Filename
 	log.Println("Receive file:", header.Filename, filename)
 
