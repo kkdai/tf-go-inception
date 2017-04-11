@@ -27,5 +27,4 @@ func main() {
 	forever := make(chan bool)
 	port := os.Getenv("PORT")
 	log.Println("-----Server Start in port=", port, " -----")
-	serveHttpAPI(":6000", forever)
-}
+	serveHTTPAPI(":6000", forever)

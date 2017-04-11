@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//serveHttpAPI :
-func serveHttpAPI(port string, existC chan bool) {
+//serveHTTPAPI :
+func serveHTTPAPI(port string, existC chan bool) {
 	fmt.Println("Enter http")
 
 	go func() {
@@ -25,7 +26,7 @@ func serveHttpAPI(port string, existC chan bool) {
 
 	jobAPI := router.Group("/api/v1/tf-image")
 	{
-		jobAPI.POST("/", CreateTFImage)
+		jobAPI.POST("/", PredictTFImage)
 	}
 
 	fooAPI := router.Group("/api/v1/foo")
@@ -49,11 +50,12 @@ func serveHttpAPI(port string, existC chan bool) {
 	router.Run(":3000")
 }
 
-//CreateTFImage :
-func CreateTFImage(c *gin.Context) {
+//PredictTFImage :
+func PredictTFImage(c *gin.Context) {
 	file, header, err := c.Request.FormFile("upload")
 	filename := header.Filename
-	log.Println(header.Filename, filename)
+	log.Println("Receive file:", header.Filename, filename)
+
 	byt, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Println("Read upload file err:", err)
@@ -61,7 +63,18 @@ func CreateTFImage(c *gin.Context) {
 		return
 	}
 
-	byteToTensor(byt)
+	defer file.Close()
+	// fmt.Fprintf(w, "%v", header)
+	f, err := os.OpenFile("./test/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+	io.Copy(f, file)
+
+	ret := TFfromForm(byt)
+	c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": fmt.Sprintf("Predict result:%s", ret)})
 	// completed, _ := strconv.Atoi(c.PostForm("completed"))
 	// todo := Todo{Title: c.PostForm("title"), Completed: completed}
 	// db, _ := Database()
