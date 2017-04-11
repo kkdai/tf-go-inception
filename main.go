@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,14 +15,6 @@ func main() {
 	CurrentPath, err = filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	imagefile := flag.String("image", "", "Path of a JPEG-image to extract labels for")
-	flag.Parse()
-	log.Println("Path=", CurrentPath, " img=", *imagefile)
-
-	if imagefile != nil {
-		MainTF(CurrentPath, *imagefile)
 	}
 
 	forever := make(chan bool)
