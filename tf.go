@@ -184,7 +184,7 @@ func printBestLabel(probabilities []float32, labelsFile string) string {
 	if err := scanner.Err(); err != nil {
 		log.Printf("ERROR: failed to read %s: %v", labelsFile, err)
 	}
-	str := fmt.Sprintf("BEST MATCH: (%2.0f%% likely) %s\n", probabilities[bestIdx]*100.0, labels[bestIdx])
+	str := fmt.Sprintf("(%2.0f%% likely) %s\n", probabilities[bestIdx]*100.0, labels[bestIdx])
 	log.Println(str)
 	return str
 }
