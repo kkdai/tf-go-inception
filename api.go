@@ -29,14 +29,14 @@ func serveHTTPAPI(port string, existC chan bool) {
 		jobAPI.POST("/", PredictTFImage)
 	}
 
-	// fooAPI := router.Group("/api/v1/foo")
-	// {
-	// 	fooAPI.POST("/", CreatFoo)
-	// 	fooAPI.GET("/", TestFoo)
-	// 	// 	rsAPI.GET("/:id", FetchSingleJob)
-	// 	// 	rsAPI.PUT("/:id", UpdateJob)
-	// 	// 	rsAPI.DELETE("/:id", DeleteJob)
-	// }
+	fooAPI := router.Group("/api/v1/foo")
+	{
+		fooAPI.POST("/", CreatFoo)
+		fooAPI.GET("/", TestFoo)
+		// 	// 	rsAPI.GET("/:id", FetchSingleJob)
+		// 	// 	rsAPI.PUT("/:id", UpdateJob)
+		// 	// 	rsAPI.DELETE("/:id", DeleteJob)
+	}
 
 	// rsAPI := router.Group("/api/v1/resources")
 	// {
