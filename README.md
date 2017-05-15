@@ -12,12 +12,26 @@ tf-go-inception: A Go API server to serve Tensorflow Inception Model
 
 ## How to build it
 
-TBC
+- Install Go 1.8
+- Download tensorflow prebuild library
+
+```
+TF_TYPE="cpu" # Set to "gpu" for GPU support
+curl -L \
+  "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-${TF_TYPE}-$(go env GOOS)-x86_64-1.1.0.tar.gz" |
+sudo tar -C /usr/local -xz
+```
+
+- Change your LD_LIBRARY path `export LD_LIBRARY_PATH=/usr/local/lib/`
+- Clone this repo
+- Just build it `go build`
+- Run this web server it will default port `3000`
 
 
 ## API List:
 
-TBC
+- `/api/v1/tf-image`: POST API to upload image in multipart "upload".
+- `/api/v1/foo`:  Testing API and just response "bar".
 
 ## How to use it
 
