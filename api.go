@@ -6,9 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
+
+var mutex = &sync.Mutex{}
 
 //serveHTTPAPI :
 func serveHTTPAPI(port string, existC chan bool) {
@@ -32,21 +35,13 @@ func serveHTTPAPI(port string, existC chan bool) {
 	{
 		fooAPI.GET("/", TestFoo)
 	}
-
-	// rsAPI := router.Group("/api/v1/resources")
-	// {
-	// 	rsAPI.POST("/", CreateJob)
-	// 	rsAPI.GET("/", FetchAllJobs)
-	// 	rsAPI.GET("/:id", FetchSingleJob)
-	// 	rsAPI.PUT("/:id", UpdateJob)
-	// 	rsAPI.DELETE("/:id", DeleteJob)
-	// }
-
 	router.Run(port)
 }
 
 //PredictTFImage :
 func PredictTFImage(c *gin.Context) {
+	mutex.Lock()
+
 	log.Println("Entry PredictTFImage..")
 	file, header, err := c.Request.FormFile("upload")
 	defer file.Close()
@@ -64,8 +59,9 @@ func PredictTFImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "Error happen!"})
 		return
 	}
-
 	ret := TFfromForm(byt)
+
+	mutex.Unlock()
 	c.JSON(http.StatusCreated, gin.H{"status": http.StatusOK, "message": fmt.Sprintf("Predict result:%s", ret)})
 }
 
